@@ -49,7 +49,12 @@ public class NodeBehaviour extends CyclicBehaviour{
                         originalRequest = true;
                     }
 
-                    String agentList = String.join("\n", Arrays.copyOfRange(lines, 1, lines.length)) + "\n" + myAgent.getLocalName() + "\n";
+                    String agentList = String.join("\n", Arrays.copyOfRange(lines, 1, lines.length));
+                    if(agentList.length() == 0){
+                        agentList = myAgent.getLocalName() + "\n";
+                    } else {
+                        agentList = agentList + "\n" + myAgent.getLocalName() + "\n";
+                    }
                     
 
                     if(myAgent.getLocalName().equals(nodeInSearch)){
