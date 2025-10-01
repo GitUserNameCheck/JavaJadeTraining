@@ -3,8 +3,7 @@
  */
 package agent;
 
-import agent.second.AgentCalculator;
-import agent.second.AgentCoordinator;
+import agent.third.AgentNode;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -30,12 +29,21 @@ public class App {
 
         AgentContainer mainContainer = rt.createMainContainer(p);
 
-        AgentController coordinator = mainContainer.createNewAgent("coordinator", AgentCoordinator.class.getName(), null);
-        coordinator.start();
-        for (int i = 1; i <= 3; i++) {
-            mainContainer
-                    .createNewAgent("calculator" + i, AgentCalculator.class.getName(), null)
-                    .start();
-        }
+        AgentController node1 = mainContainer.createNewAgent("node1", AgentNode.class.getName(), new String[] { "node2", "node5" });
+        node1.start();
+        AgentController node2 = mainContainer.createNewAgent("node2", AgentNode.class.getName(), new String[] { "node1", "node3" });
+        node2.start();
+        AgentController node3 = mainContainer.createNewAgent("node3", AgentNode.class.getName(), new String[] { "node2", "node4", "node6" });
+        node3.start();
+        AgentController node4 = mainContainer.createNewAgent("node4", AgentNode.class.getName(), new String[] { "node3", "node5" });
+        node4.start();
+        AgentController node5 = mainContainer.createNewAgent("node5", AgentNode.class.getName(), new String[] { "node1", "node4", "node8" });
+        node5.start();
+        AgentController node6 = mainContainer.createNewAgent("node6", AgentNode.class.getName(), new String[] { "node3" });
+        node6.start();
+        AgentController node7 = mainContainer.createNewAgent("node7", AgentNode.class.getName(), new String[] {});
+        node7.start();
+        AgentController node8 = mainContainer.createNewAgent("node8", AgentNode.class.getName(), new String[] { "node5" });
+        node8.start();
     }
 }
