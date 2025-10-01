@@ -30,9 +30,7 @@ public class App {
 
         AgentContainer mainContainer = rt.createMainContainer(p);
 
-        String[] CalculatorAgents = new String[] { "calculator1", "calculator2", "calculator3" };
-
-        AgentController coordinator = mainContainer.createNewAgent("coordinator", AgentCoordinator.class.getName(), CalculatorAgents);
+        AgentController coordinator = mainContainer.createNewAgent("coordinator", AgentCoordinator.class.getName(), null);
         coordinator.start();
         for (int i = 1; i <= 3; i++) {
             mainContainer

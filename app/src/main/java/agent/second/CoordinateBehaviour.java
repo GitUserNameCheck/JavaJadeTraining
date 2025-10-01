@@ -7,6 +7,10 @@ import java.util.List;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import jade.util.Logger;
 
@@ -20,9 +24,8 @@ public class CoordinateBehaviour extends CyclicBehaviour{
     int answer = 0;
     int agentNumber = 0;
 
-    public CoordinateBehaviour(Agent parent, HashMap<String, Boolean> map){
+    public CoordinateBehaviour(Agent parent) {
         super(parent);
-        this.agents = map;
         logger = Logger.getMyLogger(getClass().getName() + "@" + parent.getLocalName());
     }
 
@@ -34,6 +37,33 @@ public class CoordinateBehaviour extends CyclicBehaviour{
         if (msg != null) {
 
             if (msg.getPerformative() == ACLMessage.REQUEST && "sum".equals(msg.getLanguage()) && !busy) {
+
+                DFAgentDescription template = new DFAgentDescription();
+                ServiceDescription sd = new ServiceDescription();
+                sd.setType("calculation");
+                template.addServices(sd);
+
+                try {
+                    DFAgentDescription[] result = DFService.search(myAgent, template);
+                    
+                    agents = new HashMap<String, Boolean>();
+
+                    for (DFAgentDescription DFD : result) {
+                        AID agentID = DFD.getName();
+                        String localName = agentID.getLocalName();
+
+                        agents.put(localName, false);
+                    }
+
+
+                    logger.info(myAgent.getLocalName() + ": found calculator agents\n" + agents.toString());
+
+
+                } catch (FIPAException fe) {
+                    fe.printStackTrace();
+                }
+
+
 
                 String content = msg.getContent();
 
@@ -86,7 +116,7 @@ public class CoordinateBehaviour extends CyclicBehaviour{
                         answer = 0;
                         answerReceiverName = null;
                         busy = false;
-                        agents.replaceAll((k, v) -> false);
+                        // agents.replaceAll((k, v) -> false);
                     }
                 }
             }
