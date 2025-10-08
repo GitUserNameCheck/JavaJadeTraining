@@ -3,6 +3,10 @@ package agent.fourth.AgentCoordinator;
 import jade.core.Agent;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.FSMBehaviour;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.util.Logger;
 
 public class AgentCoordinator extends Agent{
@@ -16,6 +20,20 @@ public class AgentCoordinator extends Agent{
 
     @Override
     protected void setup(){
+
+        DFAgentDescription DFD = new DFAgentDescription();
+        DFD.setName(getAID());
+        ServiceDescription SD = new ServiceDescription();
+        SD.setType("coordinator");
+        SD.setName(getLocalName());
+        DFD.addServices(SD);
+
+        try {
+            DFService.register(this, DFD);
+            logger.info(getLocalName() + " registered in DF as a 'coordinator' service.");
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
 
         FSMBehaviour fsm = new FSMBehaviour(this);
         DataStore ds = new DataStore();

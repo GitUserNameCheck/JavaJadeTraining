@@ -4,6 +4,7 @@
 package agent;
 
 import agent.fourth.AgentCalculator.AgentCalculator;
+import agent.fourth.AgentClient.AgentClient;
 import agent.fourth.AgentCoordinator.AgentCoordinator;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
@@ -26,9 +27,16 @@ public class App {
 
         AgentContainer mainContainer = rt.createMainContainer(p);
 
-        AgentController coordinator = mainContainer.createNewAgent("coordinator", AgentCoordinator.class.getName(), null);
+        AgentController client = mainContainer.createNewAgent("client", AgentClient.class.getName(), null);
 
-        coordinator.start();
+        client.start();
+
+        for (int i = 1; i <= 3; i++) {
+            mainContainer
+                    .createNewAgent("coordinator" + i,AgentCoordinator.class.getName(), null)
+                    .start();
+        }
+
         for (int i = 1; i <= 3; i++) {
             mainContainer
                     .createNewAgent("calculator" + i, AgentCalculator.class.getName(), null)

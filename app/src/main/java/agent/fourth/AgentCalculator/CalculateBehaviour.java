@@ -10,8 +10,13 @@ public class CalculateBehaviour extends OneShotBehaviour {
     
     Logger logger = null;
 
-    public CalculateBehaviour(Agent parent){
+    AID agent_to_reply;
+    String interval;
+
+    public CalculateBehaviour(Agent parent, AID agent_to_reply, String interval){
         super(parent);
+        this.agent_to_reply = agent_to_reply;
+        this.interval = interval;
         logger = Logger.getMyLogger(getClass().getName() + "@" + parent.getLocalName());
     }
 
@@ -19,9 +24,9 @@ public class CalculateBehaviour extends OneShotBehaviour {
     public void action() {
         long delay = 5000;
 
-        logger.info(myAgent.getLocalName() + ": calculating\n" + "sum: " + getDataStore().get("sum") + "\n");
+        logger.info(myAgent.getLocalName() + ": calculating\n" + "sum: " + interval + "\n");
 
-        String[] parts = ((String) getDataStore().get("sum")).split(",");
+        String[] parts = interval.split(",");
         int a = Integer.parseInt(parts[0].trim());
         int b = Integer.parseInt(parts[1].trim());
         int answer = (b - a + 1) * (a + b) / 2;
@@ -31,12 +36,8 @@ public class CalculateBehaviour extends OneShotBehaviour {
 
         ACLMessage reply = new ACLMessage(ACLMessage.CONFIRM);
         reply.setContent(String.valueOf(answer));
-        reply.addReceiver(((AID) getDataStore().get("replyTo")));
+        reply.addReceiver(agent_to_reply);
         myAgent.send(reply);
-
-
-        getDataStore().remove("sum");
-        getDataStore().remove("replyTo");
 
     }
 }

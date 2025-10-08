@@ -38,34 +38,9 @@ public class AgentCalculator extends Agent{
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-        
-        // https://jade.tilab.com/doc/api/jade/core/behaviours/FSMBehaviour.html
-        FSMBehaviour fsm = new FSMBehaviour(this);
-        DataStore ds = new DataStore();
-
-        WaitForMessageBehaviour waitForMsg = new WaitForMessageBehaviour(this);
-        waitForMsg.setDataStore(ds);
-
-        ParallelBehaviour CalculateRefuse = new ParallelBehaviour(this, ParallelBehaviour.WHEN_ANY);
-
-
-
-        RefuseBehaviour refuse = new RefuseBehaviour(this);
-        CalculateBehaviour calculate = new CalculateBehaviour(this);
-        calculate.setDataStore(ds);
-
-        CalculateRefuse.addSubBehaviour(refuse);
-        CalculateRefuse.addSubBehaviour(tbf.wrap(calculate));
-
-        fsm.registerFirstState(waitForMsg, "wait");
-        fsm.registerState(CalculateRefuse, "calculate");
-
-        fsm.registerDefaultTransition("wait", "calculate");
-        fsm.registerDefaultTransition("calculate", "wait" , new String[] { "calculate" });
-
 
         logger.info("Hello! Agent " + getLocalName() + " is ready");
-        addBehaviour(fsm);
+        addBehaviour(new WaitForMessageBehaviour(this, tbf));
     }
 
     @Override
