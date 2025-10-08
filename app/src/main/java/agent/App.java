@@ -3,7 +3,8 @@
  */
 package agent;
 
-import agent.third.AgentNode;
+import agent.fourth.AgentCalculator.AgentCalculator;
+import agent.fourth.AgentCoordinator.AgentCoordinator;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -21,29 +22,17 @@ public class App {
         Runtime rt = Runtime.instance();
         Profile p = new ProfileImpl();
 
-        // p.setParameter(Profile.MAIN_HOST, "localhost");
-
-        // p.setParameter(Profile.MAIN_PORT, "10099");
-
         p.setParameter(Profile.GUI, "true");
 
         AgentContainer mainContainer = rt.createMainContainer(p);
 
-        AgentController node1 = mainContainer.createNewAgent("node1", AgentNode.class.getName(), new String[] { "node2", "node5" });
-        node1.start();
-        AgentController node2 = mainContainer.createNewAgent("node2", AgentNode.class.getName(), new String[] { "node1", "node3" });
-        node2.start();
-        AgentController node3 = mainContainer.createNewAgent("node3", AgentNode.class.getName(), new String[] { "node2", "node4", "node6" });
-        node3.start();
-        AgentController node4 = mainContainer.createNewAgent("node4", AgentNode.class.getName(), new String[] { "node3", "node5" });
-        node4.start();
-        AgentController node5 = mainContainer.createNewAgent("node5", AgentNode.class.getName(), new String[] { "node1", "node4", "node8" });
-        node5.start();
-        AgentController node6 = mainContainer.createNewAgent("node6", AgentNode.class.getName(), new String[] { "node3" });
-        node6.start();
-        AgentController node7 = mainContainer.createNewAgent("node7", AgentNode.class.getName(), new String[] {});
-        node7.start();
-        AgentController node8 = mainContainer.createNewAgent("node8", AgentNode.class.getName(), new String[] { "node5" });
-        node8.start();
+        AgentController coordinator = mainContainer.createNewAgent("coordinator", AgentCoordinator.class.getName(), null);
+
+        coordinator.start();
+        for (int i = 1; i <= 3; i++) {
+            mainContainer
+                    .createNewAgent("calculator" + i, AgentCalculator.class.getName(), null)
+                    .start();
+        }
     }
 }
