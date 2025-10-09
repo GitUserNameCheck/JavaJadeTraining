@@ -3,9 +3,9 @@
  */
 package agent;
 
-import agent.fourth.AgentCalculator.AgentCalculator;
-import agent.fourth.AgentClient.AgentClient;
-import agent.fourth.AgentCoordinator.AgentCoordinator;
+import agent.fifth.AgentCalculator.AgentCalculator;
+import agent.fifth.AgentClient.AgentClient;
+import agent.fifth.AgentCoordinator.AgentCoordinator;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
