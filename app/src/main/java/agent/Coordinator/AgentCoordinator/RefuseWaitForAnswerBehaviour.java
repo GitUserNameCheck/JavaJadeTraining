@@ -1,4 +1,4 @@
-package agent.fifth.AgentCoordinator;
+package agent.Coordinator.AgentCoordinator;
 
 import java.util.HashMap;
 

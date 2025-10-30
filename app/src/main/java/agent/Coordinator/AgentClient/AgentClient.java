@@ -1,4 +1,4 @@
-package agent.fifth.AgentClient;
+package agent.Coordinator.AgentClient;
 
 import jade.core.Agent;
 import jade.core.behaviours.ThreadedBehaviourFactory;

@@ -1,4 +1,4 @@
-package agent.fifth.AgentCalculator;
+package agent.Coordinator.AgentCalculator;
 
 import jade.core.AID;
 import jade.core.Agent;

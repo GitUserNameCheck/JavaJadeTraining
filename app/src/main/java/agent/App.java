@@ -3,14 +3,9 @@
  */
 package agent;
 
-import agent.fifth.AgentCalculator.AgentCalculator;
-import agent.fifth.AgentClient.AgentClient;
-import agent.fifth.AgentCoordinator.AgentCoordinator;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
-import jade.wrapper.AgentContainer;
-import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 
 public class App {
@@ -25,22 +20,6 @@ public class App {
 
         p.setParameter(Profile.GUI, "true");
 
-        AgentContainer mainContainer = rt.createMainContainer(p);
-
-        AgentController client = mainContainer.createNewAgent("client", AgentClient.class.getName(), null);
-
-        client.start();
-
-        for (int i = 1; i <= 3; i++) {
-            mainContainer
-                    .createNewAgent("coordinator" + i,AgentCoordinator.class.getName(), null)
-                    .start();
-        }
-
-        for (int i = 1; i <= 3; i++) {
-            mainContainer
-                    .createNewAgent("calculator" + i, AgentCalculator.class.getName(), null)
-                    .start();
-        }
+        rt.createMainContainer(p);
     }
 }

@@ -1,4 +1,4 @@
-package agent.fourth.AgentCoordinator;
+package agent.Coordinator.AgentCoordinator;
 
 import jade.core.Agent;
 import jade.core.behaviours.DataStore;
@@ -7,6 +7,8 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.util.Logger;
 
 public class AgentCoordinator extends Agent{
@@ -37,21 +39,40 @@ public class AgentCoordinator extends Agent{
 
         FSMBehaviour fsm = new FSMBehaviour(this);
         DataStore ds = new DataStore();
+        MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
 
-        WaitForRequestBehaviour wait = new WaitForRequestBehaviour(this);
-        wait.setDataStore(ds);
+        ResponderBehaviourByHand respond = new ResponderBehaviourByHand(this, mt);
+        respond.setDataStore(ds);
 
         RefuseWaitForAnswerBehaviour refuse = new RefuseWaitForAnswerBehaviour(this);
         refuse.setDataStore(ds);
 
-        fsm.registerFirstState(wait, "wait");
+        fsm.registerFirstState(respond, "respond");
         fsm.registerState(refuse, "refuse");
 
-        fsm.registerDefaultTransition("wait", "refuse");
-        fsm.registerDefaultTransition("refuse", "wait");
+        // fsm.registerDefaultTransition("respond", "refuse");
+        // fsm.registerDefaultTransition("refuse", "respond");
+
+        fsm.registerTransition("respond", "refuse", 1); 
+        fsm.registerTransition("respond", "respond", 0); 
+
+        fsm.registerDefaultTransition("refuse", "respond");
 
 
         logger.info("Hello! Agent " + getLocalName() + " is ready");
         addBehaviour(fsm);
     }
+
+    @Override
+    protected void takeDown() {
+        try {
+            DFService.deregister(this);
+            logger.info(getLocalName() + " deregistered from DF.");
+        } catch (FIPAException fe) {
+            fe.printStackTrace();
+        }
+
+        logger.info("Agent " + getLocalName() + " terminating.");
+    }
+
 }

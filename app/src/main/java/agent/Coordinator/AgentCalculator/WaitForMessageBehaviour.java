@@ -1,4 +1,4 @@
-package agent.fifth.AgentCalculator;
+package agent.Coordinator.AgentCalculator;
 
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
