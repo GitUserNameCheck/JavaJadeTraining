@@ -2,7 +2,6 @@ package agent.Coordinator;
 
 import agent.Coordinator.AgentCalculator.AgentCalculator;
 import agent.Coordinator.AgentClient.AgentClient;
-import agent.Coordinator.AgentCoordinator.AgentCoordinator;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
@@ -26,13 +25,7 @@ public class CoordinatorContainer {
 
         client.start();
 
-        for (int i = 1; i <= 3; i++) {
-            container
-                    .createNewAgent("coordinator" + i,AgentCoordinator.class.getName(), null)
-                    .start();
-        }
-
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= 5; i++) {
             container
                     .createNewAgent("calculator" + i, AgentCalculator.class.getName(), null)
                     .start();

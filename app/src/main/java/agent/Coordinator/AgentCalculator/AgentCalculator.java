@@ -1,11 +1,16 @@
 package agent.Coordinator.AgentCalculator;
 
 import jade.core.Agent;
+import jade.core.behaviours.DataStore;
+import jade.core.behaviours.FSMBehaviour;
+import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.util.Logger;
 
 public class AgentCalculator extends Agent{
@@ -36,8 +41,39 @@ public class AgentCalculator extends Agent{
             fe.printStackTrace();
         }
 
+        FSMBehaviour fsm = new FSMBehaviour(this);
+        DataStore ds = new DataStore();
+        MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+
+
+        WaitForMessageBehaviour waitForMes = new WaitForMessageBehaviour(this, tbf);
+        waitForMes.setDataStore(ds);
+
+        ElectionBehaviour election = new ElectionBehaviour(this);
+        election.setDataStore(ds);
+
+        ResponderBehaviourByHand respond = new ResponderBehaviourByHand(this, mt);
+        respond.setDataStore(ds);
+
+        RefuseWaitForAnswerBehaviour refuse = new RefuseWaitForAnswerBehaviour(this);
+        refuse.setDataStore(ds);
+        
+        fsm.registerFirstState(waitForMes, "waitForMes");
+        fsm.registerState(election, "election");
+        fsm.registerState(respond, "respond");
+        fsm.registerState(refuse, "refuse");
+
+
+        fsm.registerTransition("waitForMes", "election", 2); 
+        fsm.registerTransition("election", "waitForMes", 3);
+        fsm.registerTransition("election", "respond", 4); 
+        fsm.registerTransition("respond", "refuse", 1);
+
+
+        fsm.registerDefaultTransition("refuse", "respond");
+
         logger.info("Hello! Agent " + getLocalName() + " is ready");
-        addBehaviour(new WaitForMessageBehaviour(this, tbf));
+        addBehaviour(fsm);
     }
 
     @Override

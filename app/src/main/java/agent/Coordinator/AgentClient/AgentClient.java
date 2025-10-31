@@ -1,6 +1,8 @@
 package agent.Coordinator.AgentClient;
 
 import jade.core.Agent;
+import jade.core.behaviours.DataStore;
+import jade.core.behaviours.FSMBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.util.Logger;
 
@@ -18,8 +20,22 @@ public class AgentClient extends Agent {
     @Override
     protected void setup() {
 
+        FSMBehaviour fsm = new FSMBehaviour(this);
+        DataStore ds = new DataStore();
+
+        AgentClientBehaviour agentClient = new AgentClientBehaviour(this);
+        agentClient.setDataStore(ds);
+        ContractNetCreateBehaviour contractCreate = new ContractNetCreateBehaviour(this, tbf);
+        contractCreate.setDataStore(ds);
+
+        fsm.registerFirstState(agentClient, "agentClient");
+        fsm.registerState(contractCreate, "contractCreate");
+
+        fsm.registerDefaultTransition("agentClient", "contractCreate");
+        fsm.registerDefaultTransition("contractCreate", "agentClient");
+
         logger.info("Hello! Agent " + getLocalName() + " is ready");
-        addBehaviour(new AgentClientBehaviour(this, tbf));
+        addBehaviour(fsm);
     }
 
     @Override

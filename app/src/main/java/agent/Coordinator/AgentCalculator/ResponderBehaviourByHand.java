@@ -1,4 +1,4 @@
-package agent.Coordinator.AgentCoordinator;
+package agent.Coordinator.AgentCalculator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,6 @@ public class ResponderBehaviourByHand extends Behaviour{
 
     MessageTemplate mtCFP;
 
-    int exitCode = 0;
     boolean finished = false;
 
     ACLMessage cfp_last = null;
@@ -33,7 +32,29 @@ public class ResponderBehaviourByHand extends Behaviour{
 
     @Override
     public void action() {
-        
+
+        // logger.info(myAgent.getLocalName() + ": respond");
+
+        ACLMessage proposeRej = myAgent.receive(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
+
+        if (proposeRej != null) {
+            // logger.info(myAgent.getLocalName() + " answering failure check to " +
+            // failure.getSender().getLocalName());
+            ACLMessage failureCheck = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+            failureCheck.addReceiver(proposeRej.getSender());
+            myAgent.send(failureCheck);
+        }
+
+        ACLMessage failure = myAgent.receive(MessageTemplate.MatchPerformative(ACLMessage.FAILURE));
+
+        if(failure != null){
+            logger.info(myAgent.getLocalName() + " answering failure check to " + failure.getSender().getLocalName());
+            ACLMessage failureCheck = new ACLMessage(ACLMessage.FAILURE);
+            failureCheck.addReceiver(failure.getSender());
+            myAgent.send(failureCheck);
+        }
+
+
         ACLMessage accept = myAgent.receive(MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL));
         if (accept != null) {
             logger.info(myAgent.getLocalName() + " proposal accepted. Doing the job...");
@@ -84,7 +105,6 @@ public class ResponderBehaviourByHand extends Behaviour{
                 logger.info(myAgent.getLocalName() + ": interval [" + interval[0] + "," + interval[1] + "] to "
                         + agentName);
             }
-            exitCode = 1;
             finished = true;
             return;
         }
@@ -112,14 +132,9 @@ public class ResponderBehaviourByHand extends Behaviour{
 
     @Override
     public int onEnd() {
-        return exitCode;
-    }
-
-    @Override
-    public void reset() {
+        logger.info("respon on end");
         finished = false;
-        exitCode = 0;
-        super.reset();
+        return 1;
     }
 
     public static List<int[]> splitInterval(int a, int b, int n) {

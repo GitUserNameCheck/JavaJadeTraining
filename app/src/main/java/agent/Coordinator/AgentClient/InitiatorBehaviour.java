@@ -82,4 +82,9 @@ public class InitiatorBehaviour extends ContractNetInitiator{
         myAgent.send(reply);
     }
 
+    @Override
+    public int onEnd(){
+        getDataStore().put("done", true);
+        return 0;
+    }
 }

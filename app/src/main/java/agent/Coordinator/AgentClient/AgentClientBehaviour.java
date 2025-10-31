@@ -6,7 +6,6 @@ import java.util.List;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -22,16 +21,16 @@ public class AgentClientBehaviour extends Behaviour {
 
     boolean done = false;
 
-    private ThreadedBehaviourFactory tbf;
-
-    public AgentClientBehaviour(Agent parent, ThreadedBehaviourFactory tbf) {
+    public AgentClientBehaviour(Agent parent) {
         super(parent);
-        this.tbf = tbf;
         logger = Logger.getMyLogger(getClass().getName() + "@" + parent.getLocalName());
     }
 
     @Override
     public void action() {
+
+        logger.info("AgentClient");
+
 
         ACLMessage msg = myAgent.receive();
 
@@ -61,9 +60,11 @@ public class AgentClientBehaviour extends Behaviour {
                             cfp.addReceiver(DFD.getName());
                         }
 
-                        myAgent.addBehaviour(tbf.wrap(new InitiatorBehaviour(myAgent, cfp, msg.getSender())));
+                        getDataStore().put("cfp", cfp);
+                        getDataStore().put("receiver", msg.getSender());
+                        logger.info(myAgent.getLocalName() + ": started contract net");
                         done = true;
-                        logger.info("INITIATOR IS WORKING");
+                        return;
 
                     } catch (FIPAException fe) {
                         fe.printStackTrace();
@@ -74,7 +75,17 @@ public class AgentClientBehaviour extends Behaviour {
         } else {
             block();
         }
+    }
 
+    @Override
+    public boolean done() {
+        return done;
+    }
+
+    @Override
+    public int onEnd() {
+        done = false;
+        return 0;
     }
 
     public static List<int[]> splitInterval(int a, int b, int n) {
@@ -92,14 +103,4 @@ public class AgentClientBehaviour extends Behaviour {
         }
         return intervals;
     }
-
-    @Override
-    public boolean done() {
-        // if (done) {
-        //     done = false;
-        //     return true;
-        // }
-        return done;
-    }
-
 }
