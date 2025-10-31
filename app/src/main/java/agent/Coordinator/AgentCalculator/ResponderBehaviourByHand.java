@@ -24,6 +24,8 @@ public class ResponderBehaviourByHand extends Behaviour{
 
     ACLMessage cfp_last = null;
 
+    int state = 1;
+
     public ResponderBehaviourByHand(Agent parent, MessageTemplate mt) {
         super(parent);
         this.mtCFP = mt;
@@ -33,16 +35,56 @@ public class ResponderBehaviourByHand extends Behaviour{
     @Override
     public void action() {
 
+        DFAgentDescription DFD = new DFAgentDescription();
+        DFD.setName(myAgent.getAID());
+        ServiceDescription SD = new ServiceDescription();
+        SD.setType("calculation");
+        SD.setName(myAgent.getLocalName());
+        DFD.addServices(SD);
+
         // logger.info(myAgent.getLocalName() + ": respond");
 
-        ACLMessage proposeRej = myAgent.receive(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
+        ACLMessage coordinatorInform = myAgent.receive(MessageTemplate.MatchPerformative(ACLMessage.INFORM));
 
-        if (proposeRej != null) {
-            // logger.info(myAgent.getLocalName() + " answering failure check to " +
-            // failure.getSender().getLocalName());
-            ACLMessage failureCheck = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
-            failureCheck.addReceiver(proposeRej.getSender());
-            myAgent.send(failureCheck);
+        if (coordinatorInform != null) {
+            getDataStore().put("coordinator", coordinatorInform.getSender());
+            logger.info(myAgent.getLocalName() + ": got coordinator inform from "
+                    + coordinatorInform.getSender().getLocalName());
+            try {
+                DFService.deregister(myAgent);
+                logger.info(myAgent.getLocalName() + " deregistered in DF as a 'coordinator' service.");
+                DFService.register(myAgent, DFD);
+                logger.info(myAgent.getLocalName() + " registered in DF as a 'calculator' service.");
+            } catch (FIPAException fe) {
+                fe.printStackTrace();
+            }
+            finished = true;
+            state = 6;
+            logger.info(myAgent.getLocalName() + " changing to calculator");
+            return;
+
+        }
+
+        ACLMessage coordinatorPropose = myAgent.receive(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
+
+        if (coordinatorPropose != null) {
+            ACLMessage rejectProposal = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+            rejectProposal.addReceiver(coordinatorPropose.getSender());
+            myAgent.send(rejectProposal);
+            logger.info(myAgent.getLocalName() + ": rejected proposal from " + coordinatorPropose.getSender().getLocalName());
+            try {
+                DFService.deregister(myAgent);
+                logger.info(myAgent.getLocalName() + " deregistered in DF as a 'coordinator' service.");
+                DFService.register(myAgent, DFD);
+                logger.info(myAgent.getLocalName() + " registered in DF as a 'calculator' service.");
+            } catch (FIPAException fe) {
+                fe.printStackTrace();
+            }
+            finished = true;
+            state = 5;
+            logger.info(myAgent.getLocalName() + " starting election");
+            return;
+
         }
 
         ACLMessage failure = myAgent.receive(MessageTemplate.MatchPerformative(ACLMessage.FAILURE));
@@ -68,8 +110,8 @@ public class ResponderBehaviourByHand extends Behaviour{
             try {
                 DFAgentDescription[] result = DFService.search(myAgent, template);
 
-                for (DFAgentDescription DFD : result) {
-                    AID agentID = DFD.getName();
+                for (DFAgentDescription curDFD : result) {
+                    AID agentID = curDFD.getName();
                     String localName = agentID.getLocalName();
 
                     agents.put(localName, false);
@@ -132,9 +174,8 @@ public class ResponderBehaviourByHand extends Behaviour{
 
     @Override
     public int onEnd() {
-        logger.info("respon on end");
         finished = false;
-        return 1;
+        return state;
     }
 
     public static List<int[]> splitInterval(int a, int b, int n) {

@@ -37,13 +37,15 @@ public class WaitForMessageBehaviour extends Behaviour {
 
         long lastCheckDiff = Duration.between(lastFailureCheck, currentTime).getSeconds();
 
+        logger.info(myAgent.getLocalName()+ ": time from last failure successful check " + lastCheckDiff);
+
         if (lastCheckDiff > 10) {
             logger.info(myAgent.getLocalName() + " starting election");
             election = true;
             return;
         }
 
-        if (Duration.between(lastFailureCheck, currentTime).getSeconds() > 1) {
+        if (lastCheckDiff > 1) {
             AID coordinator = (AID) getDataStore().get("coordinator");
             if (coordinator != null) {
                 logger.info(myAgent.getLocalName() + ": sending failure check to " + coordinator.getLocalName());
@@ -94,7 +96,7 @@ public class WaitForMessageBehaviour extends Behaviour {
             }
 
 
-            if (msg.getPerformative() == ACLMessage.FAILURE) {
+            if (msg.getPerformative() == ACLMessage.FAILURE && msg.getSender().equals((AID) getDataStore().get("coordinator"))) {
                 lastFailureCheck = Instant.now();
             }
 

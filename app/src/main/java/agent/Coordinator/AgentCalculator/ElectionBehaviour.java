@@ -2,7 +2,9 @@ package agent.Coordinator.AgentCalculator;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 import jade.core.AID;
 import jade.core.Agent;
@@ -35,11 +37,18 @@ public class ElectionBehaviour extends Behaviour{
             ServiceDescription sd = new ServiceDescription();
             sd.setType("calculation");
             template.addServices(sd);
+            DFAgentDescription template2 = new DFAgentDescription();
+            ServiceDescription sd2 = new ServiceDescription();
+            sd2.setType("coordinator");
+            template2.addServices(sd2);
 
             try {
                 DFAgentDescription[] result = DFService.search(myAgent, template);
+                DFAgentDescription[] result2 = DFService.search(myAgent, template2);
+                DFAgentDescription[] merged = Stream.concat(Arrays.stream(result), Arrays.stream(result2))
+                                   .toArray(DFAgentDescription[]::new);
 
-                for (DFAgentDescription DFD : result) {
+                for (DFAgentDescription DFD : merged) {
                     AID agentID = DFD.getName();
                     String localName = agentID.getLocalName();
                     int myNumber = Integer.parseInt(myAgent.getLocalName().substring(10));
@@ -67,7 +76,7 @@ public class ElectionBehaviour extends Behaviour{
 
         long timeDiff = Duration.between(electionStart, Instant.now()).getSeconds();
 
-        logger.info(myAgent.getLocalName() + ": timediff" + timeDiff);
+        logger.info(myAgent.getLocalName() + ": time from election start " + timeDiff);
 
         if(timeDiff > 2){
             logger.info(myAgent.getLocalName() + ": coordinator ");
@@ -75,10 +84,18 @@ public class ElectionBehaviour extends Behaviour{
             ServiceDescription sd = new ServiceDescription();
             sd.setType("calculation");
             template.addServices(sd);
+            DFAgentDescription template2 = new DFAgentDescription();
+            ServiceDescription sd2 = new ServiceDescription();
+            sd2.setType("coordinator");
+            template2.addServices(sd2);
+            
             try {
                 DFAgentDescription[] result = DFService.search(myAgent, template);
+                DFAgentDescription[] result2 = DFService.search(myAgent, template2);
+                DFAgentDescription[] merged = Stream.concat(Arrays.stream(result), Arrays.stream(result2))
+                        .toArray(DFAgentDescription[]::new);
 
-                for (DFAgentDescription DFD : result) {
+                for (DFAgentDescription DFD : merged) {
                     AID agentID = DFD.getName();
                     if (!agentID.equals(myAgent.getAID())) {
                         ACLMessage inform = new ACLMessage(ACLMessage.INFORM);

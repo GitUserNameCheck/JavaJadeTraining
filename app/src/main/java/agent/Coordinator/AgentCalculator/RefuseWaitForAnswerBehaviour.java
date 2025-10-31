@@ -22,6 +22,7 @@ public class RefuseWaitForAnswerBehaviour extends Behaviour{
     int answer = 0;
     int agentNumber = 0;
     boolean done = false;
+    int state = 0;
 
     @Override
     public void action() {
@@ -97,7 +98,7 @@ public class RefuseWaitForAnswerBehaviour extends Behaviour{
         done = false;
         getDataStore().remove("calculatorAgents");
         getDataStore().remove("acceptProposal");
-        return 0;
+        return state;
     }
 
     @Override

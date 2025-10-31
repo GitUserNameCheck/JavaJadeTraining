@@ -68,6 +68,8 @@ public class AgentCalculator extends Agent{
         fsm.registerTransition("election", "waitForMes", 3);
         fsm.registerTransition("election", "respond", 4); 
         fsm.registerTransition("respond", "refuse", 1);
+        fsm.registerTransition("respond", "election", 5);
+        fsm.registerTransition("respond", "waitForMes", 6);
 
 
         fsm.registerDefaultTransition("refuse", "respond");
