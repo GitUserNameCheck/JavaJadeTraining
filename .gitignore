@@ -3,5 +3,4 @@
 .vscode
 # Ignore Gradle build output directory
 build
-APDescription.txt
-MTPs-Main-Container.txt
+*.txt

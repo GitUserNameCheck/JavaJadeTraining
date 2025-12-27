@@ -3,6 +3,7 @@ package agent.Graph;
 import java.util.HashSet;
 
 import jade.core.Agent;
+import jade.core.ContainerID;
 import jade.util.Logger;
 
 public class AgentNode extends Agent{
@@ -20,8 +21,20 @@ public class AgentNode extends Agent{
         Object[] args = getArguments();
 
         if(args != null){
-            for(String receiverName : (String[]) args){
-                set.add(receiverName);
+
+            if(args[0] != null){
+                for (String receiverName : (String[]) args[0]) {
+                    set.add(receiverName);
+                }
+            }
+
+            if(args[1] != null){
+                ContainerID target = new ContainerID((String) args[1], null);
+
+                if(!here().getName().equals(target.getName())){
+                    logger.info("Moving Agent " + getLocalName() + " to destinaiton " + target.getName());
+                    doMove(target);
+                }
             }
         }
 

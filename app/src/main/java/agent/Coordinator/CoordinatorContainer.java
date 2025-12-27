@@ -21,13 +21,13 @@ public class CoordinatorContainer {
 
         AgentContainer container = rt.createAgentContainer(p);
 
-        AgentController client = container.createNewAgent("client", AgentClient.class.getName(), null);
+        AgentController client = container.createNewAgent("client", AgentClient.class.getName(), new Object[] {"Coordinator-Container"});
 
         client.start();
 
         for (int i = 1; i <= 5; i++) {
             container
-                    .createNewAgent("calculator" + i, AgentCalculator.class.getName(), null)
+                    .createNewAgent("calculator" + i, AgentCalculator.class.getName(), new Object[] {"Coordinator-Container"})
                     .start();
         }
     }

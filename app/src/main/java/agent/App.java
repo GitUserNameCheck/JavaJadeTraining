@@ -3,9 +3,14 @@
  */
 package agent;
 
+import agent.Coordinator.AgentCalculator.AgentCalculator;
+import agent.Coordinator.AgentClient.AgentClient;
+import agent.Graph.AgentNode;
 import jade.core.Profile;
 import jade.core.ProfileImpl;
 import jade.core.Runtime;
+import jade.wrapper.AgentContainer;
+import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 
 public class App {
@@ -20,6 +25,52 @@ public class App {
 
         p.setParameter(Profile.GUI, "true");
 
-        rt.createMainContainer(p);
+        AgentContainer main = rt.createMainContainer(p);
+
+        Profile coordinator_container_profile = new ProfileImpl();
+
+        coordinator_container_profile.setParameter(Profile.MAIN_HOST, "localhost");
+        coordinator_container_profile.setParameter(Profile.MAIN_PORT, "1099");
+        coordinator_container_profile.setParameter(Profile.CONTAINER_NAME, "Coordinator-Container-From-Main");
+
+        AgentContainer coordinator_container = rt.createAgentContainer(coordinator_container_profile);
+
+
+        Profile graph_container_profile = new ProfileImpl();
+
+        graph_container_profile.setParameter(Profile.MAIN_HOST, "localhost");
+        graph_container_profile.setParameter(Profile.MAIN_PORT, "1099");
+        graph_container_profile.setParameter(Profile.CONTAINER_NAME, "Graph-Container-From-Main");
+
+        AgentContainer graph_container = rt.createAgentContainer(graph_container_profile);
+
+        AgentController node1 = main.createNewAgent("node1", AgentNode.class.getName(), new Object[] {new String[] { "node2", "node5" }, "Graph-Container-From-Main"});
+        node1.start();
+        AgentController node2 = main.createNewAgent("node2", AgentNode.class.getName(), new Object[] {new String[] { "node1", "node3" }, "Graph-Container-From-Main"});
+        node2.start();
+        AgentController node3 = main.createNewAgent("node3", AgentNode.class.getName(), new Object[] {new String[] { "node2", "node4", "node6" }, "Graph-Container-From-Main"});
+        node3.start();
+        AgentController node4 = main.createNewAgent("node4", AgentNode.class.getName(), new Object[] {new String[] { "node3", "node5" }, "Graph-Container-From-Main"});
+        node4.start();
+        AgentController node5 = main.createNewAgent("node5", AgentNode.class.getName(), new Object[] {new String[] { "node1", "node4", "node8" }, "Graph-Container-From-Main"});
+        node5.start();
+        AgentController node6 = main.createNewAgent("node6", AgentNode.class.getName(), new Object[] {new String[] { "node3" }, "Graph-Container-From-Main"});
+        node6.start();
+        AgentController node7 = main.createNewAgent("node7", AgentNode.class.getName(), new Object[] {new String[] {}, "Graph-Container-From-Main" });
+        node7.start();
+        AgentController node8 = main.createNewAgent("node8", AgentNode.class.getName(), new Object[] {new String[] { "node5" }, "Graph-Container-From-Main"});
+        node8.start();
+
+
+        AgentController client = main.createNewAgent("client", AgentClient.class.getName(), new Object[] {"Coordinator-Container-From-Main"});
+
+        client.start();
+
+        for (int i = 1; i <= 5; i++) {
+            main
+                .createNewAgent("calculator" + i, AgentCalculator.class.getName(), new Object[] {"Coordinator-Container-From-Main"})
+                .start();
+        }
+
     }
 }

@@ -1,9 +1,11 @@
 package agent.Coordinator.AgentCalculator;
 
+import agent.Coordinator.AgentClient.AgentClientBehaviour;
+import agent.Coordinator.AgentClient.ContractNetCreateBehaviour;
 import jade.core.Agent;
+import jade.core.ContainerID;
 import jade.core.behaviours.DataStore;
 import jade.core.behaviours.FSMBehaviour;
-import jade.core.behaviours.ParallelBehaviour;
 import jade.core.behaviours.ThreadedBehaviourFactory;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -22,11 +24,35 @@ public class AgentCalculator extends Agent{
         logger = Logger.getMyLogger(getClass().getName() + "@" + getLocalName());
     }
 
-    private ThreadedBehaviourFactory tbf = new ThreadedBehaviourFactory();
+    private transient ThreadedBehaviourFactory tbf;
 
     @Override
     protected void setup(){
 
+        Object[] args = getArguments();
+
+        if(args != null && args[0] != null){
+            ContainerID target = new ContainerID((String) args[0], null);
+
+            if(!here().getName().equals(target.getName())){
+                logger.info("Moving Agent " + getLocalName() + " to destinaiton " + target.getName());
+                doMove(target);
+            }
+        } else {
+            tbf = new ThreadedBehaviourFactory();
+            registerInDF();
+            addBehaviours();
+        }
+    }
+
+    @Override
+    protected void afterMove() {
+        tbf = new ThreadedBehaviourFactory();
+        registerInDF();
+        addBehaviours();
+    }
+
+    private void registerInDF() {
         DFAgentDescription DFD = new DFAgentDescription();
         DFD.setName(getAID());
         ServiceDescription SD = new ServiceDescription();
@@ -40,11 +66,12 @@ public class AgentCalculator extends Agent{
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
+    }
 
+    private void addBehaviours() {
         FSMBehaviour fsm = new FSMBehaviour(this);
         DataStore ds = new DataStore();
         MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
-
 
         WaitForMessageBehaviour waitForMes = new WaitForMessageBehaviour(this, tbf);
         waitForMes.setDataStore(ds);
@@ -57,26 +84,25 @@ public class AgentCalculator extends Agent{
 
         RefuseWaitForAnswerBehaviour refuse = new RefuseWaitForAnswerBehaviour(this);
         refuse.setDataStore(ds);
-        
+
         fsm.registerFirstState(waitForMes, "waitForMes");
         fsm.registerState(election, "election");
         fsm.registerState(respond, "respond");
         fsm.registerState(refuse, "refuse");
 
-
-        fsm.registerTransition("waitForMes", "election", 2); 
+        fsm.registerTransition("waitForMes", "election", 2);
         fsm.registerTransition("election", "waitForMes", 3);
-        fsm.registerTransition("election", "respond", 4); 
+        fsm.registerTransition("election", "respond", 4);
         fsm.registerTransition("respond", "refuse", 1);
         fsm.registerTransition("respond", "election", 5);
         fsm.registerTransition("respond", "waitForMes", 6);
-
 
         fsm.registerDefaultTransition("refuse", "respond");
 
         logger.info("Hello! Agent " + getLocalName() + " is ready");
         addBehaviour(fsm);
     }
+
 
     @Override
     protected void takeDown() {
